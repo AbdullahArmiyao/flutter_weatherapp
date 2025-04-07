@@ -15,5 +15,7 @@ class AuthService {
     return userCred.user;
   }
   // And this is to signout
-  void signOut() => _auth.signOut();
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
 }

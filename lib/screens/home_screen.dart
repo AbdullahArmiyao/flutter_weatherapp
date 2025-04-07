@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:weatherapp/screens/login_screen.dart';
+import 'package:weatherapp/services/auth_service.dart';
 import '../services/weather_service.dart';
 import '../utils/location_helper.dart';
 
@@ -11,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // So basically Map is like a tuple with the first value being a string  in 
+  // So basically Map is like a tuple with the first value being a string  in
   // our project and the second being of any data type since it is dynamic
   // and is usually used for api calls
   // Difference between Map and tuple is, Map is an unordered key-value pair
@@ -19,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String locationName = 'Loading...';
 
   // It is used to perform initialization tasks before the widget's build method
-  // is executed. This is basically where all asynchronus operations are 
+  // is executed. This is basically where all asynchronus operations are
   // performed
   @override
   void initState() {
@@ -31,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> loadWeather() async {
     // First we request for the user's permission to access the location
     LocationPermission permission = await Geolocator.requestPermission();
-    // If the permission is granted, get the location using the longitude and 
+    // If the permission is granted, get the location using the longitude and
     // latitude, then get the weather of the same location
     if (permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse) {
@@ -41,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final data =
           await WeatherService().getWeather(pos.latitude, pos.longitude);
 
-      // display the weather and location 
+      // display the weather and location
       setState(() {
         weather = data;
         locationName = location;
@@ -72,6 +74,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text('Wind: ${weather!['windspeed']} km/h'),
                 ],
               ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+              activeIcon: Icon(Icons.home)),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.logout_sharp),
+            label: 'Sign Out',
+          ),
+        ],
+        onTap: (index) {
+          if (index == 1) {
+            AuthService().signOut();
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()) );
+          }
+        },
       ),
     );
   }
