@@ -6,8 +6,8 @@ import 'screens/home_screen.dart';
 
 void main() async {
   // Function to ensure flutter is fully initialized
-  WidgetsFlutterBinding.ensureInitialized(); 
-  // Initializes app as a firebase project and uses the firebase options to 
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initializes app as a firebase project and uses the firebase options to
   // determine the platform options
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -17,6 +17,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
