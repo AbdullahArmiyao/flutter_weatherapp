@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/login_screen.dart';
 import 'firebase_options.dart';
-import 'screens/home_screen.dart';
 
 void main() async {
   // Function to ensure flutter is fully initialized
@@ -24,11 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Weather App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => HomeScreen(),
-        '/login': (context) => LoginScreen(),
-      },
+      home: LoginScreen(),
     );
   }
 }
