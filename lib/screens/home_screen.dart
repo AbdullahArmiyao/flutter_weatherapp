@@ -31,28 +31,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Function to load the weather
   Future<void> loadWeather() async {
-    // First we request for the user's permission to access the location
-    LocationPermission permission = await Geolocator.requestPermission();
-    // If the permission is granted, get the location using the longitude and
-    // latitude, then get the weather of the same location
-    if (permission == LocationPermission.always ||
-        permission == LocationPermission.whileInUse) {
-      final pos = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-      final location = await getLocationName(pos.latitude, pos.longitude);
-      final data =
-          await WeatherService().getWeather(pos.latitude, pos.longitude);
+    try {
+      // First we request for the user's permission to access the location
+      LocationPermission permission = await Geolocator.requestPermission();
+      // If the permission is granted, get the location using the longitude and
+      // latitude, then get the weather of the same location
+      if (permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse) {
+        final pos = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+        final location = await getLocationName(pos.latitude, pos.longitude);
+        final data =
+            await WeatherService().getWeather(pos.latitude, pos.longitude);
 
-      // display the weather and location
-      setState(() {
-        weather = data;
-        locationName = location;
-      });
-    } else {
-      // If permission is denied, simply say permission denied
-      setState(() {
-        locationName = 'Location permission denied';
-      });
+        // display the weather and location
+        setState(() {
+          weather = data;
+          locationName = location;
+        });
+      } else {
+        // If permission is denied, simply say permission denied
+        setState(() {
+          locationName = 'Location permission denied';
+        });
+      }
+    } catch (e) {
+      String err = "An error occured: $e";
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(err)));
     }
   }
 
@@ -89,7 +94,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (index) {
           if (index == 1) {
             AuthService().signOut();
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()) );
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => LoginScreen()));
           }
         },
       ),
