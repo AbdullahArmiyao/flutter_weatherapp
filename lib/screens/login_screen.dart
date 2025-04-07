@@ -11,26 +11,37 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Basically what the controller does is, it allows you to store or use the
+  // user input
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final authService = AuthService();
 
+  // Function to login
   void login() async {
     try {
+      // Using user credentials to sign user in...the functions are in the 
+      // auth_service file
       final user = await authService.signIn(
         emailController.text.trim(),
         passwordController.text.trim(),
       );
+      // If user checks out, take him to the homescreen
       if (user != null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => HomeScreen()));
-      }
-    } on FirebaseAuthException catch (e) {
+      } 
+    } 
+    // Else if there is an error with firebase, provide the error message
+    // It's the same concept as creating an account
+    on FirebaseAuthException catch (e) {
       String err = "An Error Occured. $e";
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(err)),
       );
-    } catch (e) {
+    }
+    // If there is any other error, just state it
+     catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An unexpected error occurred')),
       );
