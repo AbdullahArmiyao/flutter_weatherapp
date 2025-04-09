@@ -20,7 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Function to login
   void login() async {
     try {
-      // Using user credentials to sign user in...the functions are in the 
+      // Using user credentials to sign user in...the functions are in the
       // auth_service file
       final user = await authService.signIn(
         emailController.text.trim(),
@@ -30,8 +30,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => HomeScreen()));
-      } 
-    } 
+      }
+    }
     // Else if there is an error with firebase, provide the error message
     // It's the same concept as creating an account
     on FirebaseAuthException catch (e) {
@@ -41,22 +41,42 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
     // If there is any other error, just state it
-     catch (e) {
+    catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An unexpected error occurred')),
       );
     }
   }
 
+  void googlelog() async {
+    try {
+      final user = await authService.googlelogin();
+      if (user != null) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      }
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
   void register() async {
-    try{
+    try {
       final user = await authService.register(
         emailController.text.trim(),
         passwordController.text.trim(),
       );
-      if (user != null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => HomeScreen()));
+      if (user != null && !user.emailVerified) {
+        await user.sendEmailVerification();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("An email has been sent for you to verify")));
+      } else if (user != null && user.emailVerified) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Email exists and is verified, hit login")));
       }
     } on FirebaseAuthException catch (e) {
       String err = "An Error Occured. $e";
@@ -73,11 +93,19 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
+        body: Stack(children: [
+      Positioned.fill(
+        child: Image.asset(
+          "assets/image.jpg",
+          fit: BoxFit.cover,
+        ),
+      ),
+      Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(height: 20,),
             Text('Login', style: Theme.of(context).textTheme.headlineMedium),
             TextField(
                 controller: emailController,
@@ -88,10 +116,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true),
             const SizedBox(height: 20),
             ElevatedButton(onPressed: login, child: Text('Login')),
-            ElevatedButton(onPressed: register, child: Text("Register"))
+            SizedBox(
+              height: 30,
+            ),
+            ElevatedButton(onPressed: register, child: Text("Register")),
+            SizedBox(height: 30),
+            ElevatedButton(onPressed: googlelog, child: Text("Sign in with google"))
           ],
         ),
       ),
-    );
+    ]));
   }
 }
