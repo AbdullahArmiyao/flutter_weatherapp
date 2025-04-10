@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:weatherapp/screens/login_screen.dart';
 import 'package:weatherapp/services/auth_service.dart';
+import 'package:gif/gif.dart';
 import '../services/weather_service.dart';
 import '../utils/location_helper.dart';
 
@@ -12,7 +13,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+  late final GifController _controller;  
   // So basically Map is like a tuple with the first value being a string  in
   // our project and the second being of any data type since it is dynamic
   // and is usually used for api calls
@@ -26,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _controller = GifController(vsync: this);
     loadWeather();
   }
 
@@ -61,26 +64,55 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Weather')),
-      body: Center(
+      appBar: AppBar(
+        title: Text('Weather', textAlign: TextAlign.center,), 
+      // backgroundColor: Colors.transparent, elevation: 0,
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Gif(
+            image: AssetImage("assets/gif.gif"),
+            controller: _controller,
+            // fps: 30
+            // duration: const Duration(seconds: 5)
+            autostart: Autostart.loop,
+            placeholder: (context) => const Text("Loading..."),
+            onFetchCompleted: () => {
+              if(mounted){
+                _controller.reset(),
+                _controller.forward(),
+              }
+            },
+            fit: BoxFit.cover,
+          ),
+
+          ),
+          Center(
         // check if the weather data is null and if not, display the information
         child: weather == null
-            ? CircularProgressIndicator()
+            ? CircularProgressIndicator(color: Colors.white,)
             : Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(locationName, style: TextStyle(fontSize: 24)),
+                  Text(locationName, style: TextStyle( 
+                    color: Colors.white, 
+                    fontSize: 24
+                    )
+                  ),
                   SizedBox(height: 10),
                   Text('${weather!['temperature']}°C',
-                      style: TextStyle(fontSize: 48)),
-                  Text('Wind: ${weather!['windspeed']} km/h'),
+                      style: TextStyle(color: Colors.white, fontSize: 48)),
+                  Text('Wind: ${weather!['windspeed']} km/h', style: TextStyle(color: Colors.white,),),
                 ],
-              ),
+              ),),],
       ),
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
         items: [
           BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -92,12 +124,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         onTap: (index) {
-          if (index == 1) {
+          if (index == 0) {
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => HomeScreen()));
+          } else if (index == 1) {
             AuthService().signOut();
             Navigator.pushReplacement(context,
                 MaterialPageRoute(builder: (context) => LoginScreen()));
           }
         },
+        // backgroundColor: Colors.transparent, elevation: 0,
       ),
     );
   }
